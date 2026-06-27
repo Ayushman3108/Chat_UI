@@ -1,0 +1,441 @@
+:root {
+  color-scheme: dark;
+  --page: #212121;
+  --surface: #303030;
+  --surface-raised: #2f2f2f;
+  --surface-hover: #3a3a3a;
+  --sidebar: #171717;
+  --sidebar-hover: #252525;
+  --border: rgba(255, 255, 255, 0.1);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --text: #ececec;
+  --muted: #b4b4b4;
+  --soft: #8f8f8f;
+  --user: #2f2f2f;
+  --accent: #10a37f;
+  --shadow: 0 20px 55px rgba(0, 0, 0, 0.28);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-width: 320px;
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 15px;
+  letter-spacing: 0;
+  overflow: hidden;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+#root > .flex {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--page);
+  color: var(--text);
+}
+
+.sidebar {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  height: 100vh;
+  flex-direction: column;
+  gap: 14px;
+  padding: 12px;
+  overflow: hidden;
+  background: var(--sidebar);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.sidebar h1 {
+  display: flex;
+  align-items: center;
+  min-height: 42px;
+  margin: 0;
+  padding: 0 10px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.new-chat {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease;
+}
+
+.new-chat:hover {
+  background: var(--sidebar-hover);
+  border-color: var(--border);
+}
+
+.chat-list {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 8px;
+  overflow-y: auto;
+}
+
+.chat-list::before {
+  content: "Recent";
+  margin: 8px 8px 6px;
+  color: var(--soft);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.chat-item {
+  min-height: 38px;
+  padding: 10px 12px;
+  overflow: hidden;
+  border-radius: 8px;
+  color: #e5e5e5;
+  font-size: 14px;
+  line-height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 160ms ease;
+}
+
+.chat-item:hover {
+  background: var(--sidebar-hover);
+}
+
+.sidebar + div {
+  position: relative;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  min-width: 0;
+  height: 100vh;
+  background: var(--page);
+}
+
+.sidebar + div::before {
+  content: "ChatGPT";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  height: 56px;
+  padding: 0 24px;
+  background: rgba(33, 33, 33, 0.92);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 600;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+
+.sidebar + div > div:first-child {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  gap: 26px;
+  padding: 86px max(24px, calc((100vw - 260px - 820px) / 2)) 28px;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+.sidebar + div > div:first-child:empty::before {
+  content: "How can I help you today?";
+  display: grid;
+  place-items: center;
+  min-height: 55vh;
+  color: var(--text);
+  font-size: clamp(28px, 4vw, 38px);
+  font-weight: 600;
+  text-align: center;
+}
+
+.message {
+  position: relative;
+  width: min(100%, 760px);
+  padding: 0 0 0 46px;
+  color: var(--text);
+  font-size: 16px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+  animation: messageIn 220ms ease both;
+}
+
+.message::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.24);
+}
+
+.message.ayushman {
+  align-self: flex-end;
+  max-width: min(74%, 680px);
+  padding: 12px 18px;
+  border-radius: 18px;
+  background: var(--user);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.message.ayushman::before {
+  content: none;
+}
+
+.message.AI {
+  align-self: flex-start;
+  max-width: min(100%, 780px);
+}
+
+.message.AI::before {
+  content: "AI";
+  background: var(--accent);
+}
+
+.sidebar + div > div:first-child > div:not(.message) {
+  width: min(100%, 760px);
+  padding-left: 46px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.button-input {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  padding: 16px max(24px, calc((100vw - 260px - 820px) / 2)) 24px;
+  background: linear-gradient(180deg, rgba(33, 33, 33, 0), var(--page) 28%);
+}
+
+.button-input input {
+  width: 100%;
+  min-height: 52px;
+  padding: 14px 56px 14px 18px;
+  border: 1px solid var(--border-strong);
+  border-radius: 26px;
+  outline: none;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow);
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.button-input input::placeholder {
+  color: var(--soft);
+}
+
+.button-input input:focus {
+  background: var(--surface-raised);
+  border-color: rgba(255, 255, 255, 0.26);
+  box-shadow: 0 18px 55px rgba(0, 0, 0, 0.36);
+}
+
+.button-input button {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  flex: 0 0 52px;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: var(--text);
+  color: #111;
+  font-size: 0;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 160ms ease, background 160ms ease;
+}
+
+.button-input button::before {
+  content: "↑";
+  font-size: 22px;
+  line-height: 1;
+}
+
+.button-input button:hover {
+  background: #fff;
+  transform: translateY(-1px);
+}
+
+.button-input button:active {
+  transform: translateY(0);
+}
+
+::selection {
+  background: rgba(16, 163, 127, 0.35);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  border: 3px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+}
+
+@keyframes messageIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 760px) {
+  #root > .flex {
+    grid-template-columns: 72px minmax(0, 1fr);
+  }
+
+  .sidebar {
+    padding: 10px 8px;
+  }
+
+  .sidebar h1,
+  .chat-list::before,
+  .chat-item {
+    font-size: 0;
+  }
+
+  .sidebar h1::before {
+    content: "C";
+    display: grid;
+    width: 40px;
+    height: 40px;
+    place-items: center;
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 16px;
+  }
+
+  .new-chat {
+    justify-content: center;
+    padding: 0;
+    font-size: 0;
+  }
+
+  .new-chat::before {
+    content: "+";
+    font-size: 24px;
+    line-height: 1;
+  }
+
+  .chat-item {
+    display: grid;
+    width: 40px;
+    height: 40px;
+    min-height: 40px;
+    place-items: center;
+    padding: 0;
+  }
+
+  .chat-item::before {
+    content: "";
+    width: 22px;
+    height: 22px;
+    border-radius: 8px;
+    background: var(--surface-hover);
+  }
+
+  .sidebar + div::before {
+    padding: 0 16px;
+  }
+
+  .sidebar + div > div:first-child {
+    padding: 76px 16px 22px;
+    gap: 22px;
+  }
+
+  .message {
+    width: 100%;
+    padding-left: 42px;
+    font-size: 15px;
+  }
+
+  .message.ayushman {
+    max-width: 88%;
+  }
+
+  .button-input {
+    padding: 14px 12px 18px;
+  }
+
+  .button-input input {
+    min-height: 50px;
+  }
+
+  .button-input button {
+    width: 50px;
+    height: 50px;
+    flex-basis: 50px;
+  }
+}
+
+@media (max-width: 520px) {
+  #root > .flex {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .sidebar + div > div:first-child {
+    padding-top: 78px;
+  }
+}
