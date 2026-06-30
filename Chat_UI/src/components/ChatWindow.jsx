@@ -1,93 +1,175 @@
+import { useEffect, useState } from "react";
 import Message from "./Message";
-import {useEffect, useState} from "react";
 
-function ChatWindow(){
-    const[messages,setMessages]=useState([]); 
-    const [input,setInput]=useState("");
-    const [loading,setLoading]=useState(false);
+function ChatWindow({ selectedConversation }) {
 
-    const getChats=async()=>{
+    const [attachment, setAttachment] = useState(null);
+    const [messages, setMessages] = useState([]);
+    const [input, setInput] = useState("");
+    const [loading, setLoading] = useState(false);
+
+    // Load chats of selected conversation
+    const getChats = async () => {
+
+        if (!selectedConversation) {
+            setMessages([]);
+            return;
+        }
+
         try {
-            const response = await fetch("http://localhost:5000/chats");
+
+            const response = await fetch(
+                `http://localhost:5000/conversations/${selectedConversation._id}/chats`
+            );
+
             const data = await response.json();
-            if(data.success){
+
+            if (data.success) {
                 setMessages(data.chats);
             }
+
         } catch (error) {
-            console.error("Error fetching chats:", error);
+            console.log(error);
         }
+
     };
-    useEffect(()=>{
+
+    useEffect(() => {
         getChats();
-    },[]);
-    const sendMessage=async()=>{
-        if(input.trim()==="")
+    }, [selectedConversation]);
+
+    const sendMessage = async () => {
+
+        if (!input.trim() && !attachment) return;
+
+        if (!selectedConversation) {
+            alert("Please create a new chat first.");
             return;
+        }
+
         const userMessage = {
             text: input,
-            sender:"ayushman"
-        }
-        setMessages((previousMessages)=>([
-            ...previousMessages,
-            userMessage
-        ]));
+            sender: "user",
+            attachment: attachment ? {
+                filename: attachment.name,
+                path: attachment.path,
+                mimetype: attachment.type,
+                previewUrl: URL.createObjectURL(attachment),
+            } : null
+        };
+
+
+        setMessages((prev) => [...prev, userMessage]);
+
+        const message = input;
+        const file = attachment;
+        setAttachment(null);
         setInput("");
+
         setLoading(true);
+
         try {
-            const response = await fetch("http://localhost:5000/api", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ message: input }),
-            });
-            if(!response.ok){
-                throw new Error("Server error");
+            
+            const formData = new FormData();
+
+            formData.append("Message", message);
+            formData.append("conversationId", selectedConversation._id);
+            if (file) {
+                formData.append("attachment", file);
             }
+
+            const response = await fetch("http://localhost:5000/", {
+
+                method: "POST",
+
+                
+
+                body: formData,
+
+            });
+
+
             const data = await response.json();
-            const aiMessage = {
-                text: data.reply || "I couldn't generate a response.",
-                sender: "AI",
-            };
-            setMessages((previousMessages) => [
-                ...previousMessages,
-                aiMessage,
-            ]);
+
+            if (data.success) {
+
+                setMessages((prev) => [
+                    ...prev,
+                    {
+                        text: data.Reply,
+                        sender: "bot",
+                    },
+                ]);
+
+            }
+
         } catch (error) {
-            setMessages((previousMessages) => [
-                ...previousMessages,
-                {
-                    text: "Something went wrong. Please try again.",
-                    sender: "AI",
-                },
-            ]);
-        } finally {
-            setLoading(false);
+
+            console.log(error);
+
         }
+
+        setLoading(false);
+
     };
-    return(
-        <div>
-            <div>
+
+    return (
+
+        <div className="chat-window">
+
+            <div className="messages">
+
                 {
-                    messages.map((msg,index)=>(
-                    <Message key={index} text={msg.text} sender={msg.sender}/>    
+                    messages.map((message, index) => (
+
+                        <Message
+                            key={index}
+                            text={message.text}
+                            attachment={message.attachment}
+                            sender={message.sender}
+                        />
+
                     ))
                 }
-                {loading && <div>AI is Generating....</div>}
+
+                {
+                    loading &&
+                    <Message
+                        text="Thinking..."
+                        sender="bot"
+                    />
+                }
+
             </div>
-           <div className="button-input">
-              <input
-                  type="text"
-                  placeholder="Type a message...."
-                  value={input}
-                  onChange={e => setInput(e.target.value)}
-                  onKeyDown={(e)=>{if(e.key==="Enter")sendMessage()}}
-              />
-              <button onClick={sendMessage}>Send</button>
-           </div>
+
+            <div className="button-input">
+                <input type="file" onChange={(e) => setAttachment(e.target.files[0])} />
+                {
+                    attachment &&
+                    ( <span style={{ marginLeft: "10px" }}>{attachment.name}</span> )
+                }
+
+                <input
+                    type="text"
+                    placeholder="Type a message..."
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                            sendMessage();
+                        }
+                    }}
+                />
+
+                <button onClick={sendMessage}>
+                    Send
+                </button>
+
+            </div>
+
         </div>
-    )
+
+    );
 }
 
 export default ChatWindow;
-
